@@ -1,0 +1,132 @@
+---
+title: "Data Prep"
+author: "Magali Blanco"
+date: "1/17/2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+#library(xlsx)
+
+```
+
+prep 1-minute met data
+```{r}
+
+#import met data 
+met <- read_csv("~/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/dylos_met_dataset_ 2017-10-20 copy.csv")
+met <- unique(met)
+#View(met)
+
+#add correct column names 
+met <- met[c("Date_Time", "Temp_C", "Temp_C.min", "rh.min", "Wind_Dir_deg",  "WS_ms.min")]
+
+met$rh.min <- round(met$rh.min)
+
+colnames(met) <- c("Date_Time", "Temp_C_3m", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")
+
+#change date format to: year, month, day, hour, ?min
+
+
+#write.csv(met, file = "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/met_R_export.csv", row.names = FALSE)
+
+
+# ? split up data by spray event (n=15)
+## don't need to? use met data/data period
+
+```
+
+summarize observations to 1 hour
+
+```{r}
+met$Date_Time <-  as.POSIXct(met$Date_Time, format = "%m/%d/%y %H:%M")
+met$Year <- format(met$Date_Time, format= "%Y")
+met$Month <- format(met$Date_Time, format= "%m")
+met$Day <- format(met$Date_Time, format= "%d")
+met$Hour <- format(met$Date_Time, format= "%H")
+
+ 
+#calculate average values per hour
+met <- aggregate(data=met[,!colnames(met) %in% c("Date_Time")], .~ Year+Month+Day+Hour, mean)
+met$Temp_C_3m <- round(met$Temp_C_3m,1)
+met$Temp_C_10m <- round(met$Temp_C_10m,1)
+met$rh <- round(met$rh)
+met$WD_Deg <- round(met$WD_Deg) 
+met$WS_ms <- round(met$WS_ms,1)
+
+# create missing hours with NA values
+full_hours <- c(seq(0,9,by=1), seq(13,23,by=1))
+june_hours <- data.frame(Year=2016, Month=06, Day=10, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
+
+full_hours <- c(seq(0,8,by=1), seq(12,23,by=1))
+sep1_hours <- data.frame(Year=2016, Month=09, Day=28, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
+
+full_hours <- c(seq(0,7,by=1), seq(11,23,by=1))
+sep2_hours <- data.frame(Year=2016, Month=09, Day=29, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
+
+full_hours <- c(seq(0,7,by=1), seq(11,23,by=1))
+sep3_hours <- data.frame(Year=2016, Month=09, Day=30, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
+
+NA_hrs <- rbind(june_hours, sep1_hours, sep2_hours, sep3_hours) 
+
+## Merge the complete data frame with the incomplete to fill in the dates and add
+## NAs for missing values
+#my_complete_data <- merge(full_hours, my_incomplete_data, by = "date",
+ #                         all.x = TRUE)
+
+met <- rbind(NA_hrs, met)#, all.x=T)
+
+met$Month <- as.numeric(met$Month)
+met$Day <- as.numeric(met$Day)
+met$Hour <- as.numeric(met$Hour)
+
+#write.csv(met, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Hr_Met_RExport.csv", row.names = F)
+
+```
+
+
+(too complicated)  look at all met data? 
+```{r}
+# met_june <- read.csv("Datasets/MetTenSecondData_09-10JUN2016.csv", header = TRUE)
+# met_sept <- read.csv("/Users/magaliblanco/Desktop/Thesis/2.Data/2.Analysis/R/Datasets/TenSecondData_28-30SEPT2016_copy.csv")
+# met_sept <- met_sept[-c(1:3),-c(3:5,8,10)]
+# 
+# colnames(met_june) <- c("Date_Time", "Record", "Temp_C", "Wind_Spd_ms", "Wind_Dir_deg")
+# colnames(met_sept) <- c("Date_Time", "Record", "Temp_C", "Wind_Spd_ms", "Wind_Dir_deg")
+# 
+# #add sept met data 
+# met <- rbind(met_june,met_sept)
+# 
+# #take mean of the data by min
+# 
+# met$Temp_C <- as.numeric(met$Temp_C)
+# 
+# met$Temp_F <- met$Temp_C*9/5 + 32
+# met$Temp_F <- as.numeric(met$Temp_F)
+# 
+# met$Wind_Spd_ms <-as.numeric(met$Wind_Spd_ms)
+# 
+# met$Wind_Spd_MPH <- met$Wind_Spd_ms/2/15*64
+# met$Wind_Spd_MPH <- as.numeric(met$Wind_Spd_MPH)
+# 
+# met$Wind_Dir_deg <- as.numeric(met$Wind_Dir_deg)
+# 
+# met$Date_Time <- as.POSIXct(met$Date_Time, format = '%m/%d/%y %I:%M %p')
+# 
+# met <- aggregate(data=met, cbind(Temp_C, Temp_F, Wind_Spd_ms, Wind_Spd_MPH, Wind_Dir_deg) 
+#                  ~ Date_Time, mean)
+# 
+# met$Wind_Dir_deg <- as.numeric(met$Wind_Dir_deg)
+# met$Wind_Dir_card <- as.factor(degToCard(met$Wind_Dir_deg))
+
+```
+
+
+
+prep spray observations 
+```{r}
+
+```
+
