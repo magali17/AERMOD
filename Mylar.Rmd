@@ -73,7 +73,7 @@ Dylos <- read_csv("~/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost
 #select only sept dates, loc A & C, Height Below, Event != control,   ; specific columns
 Dylos <- Dylos[c(Dylos$Date != "6/10/16" & (Dylos$Location=="A" | Dylos$Location=="C") & Dylos$Height=="Below" & Dylos$Event != "Control"), c("Date", "Sprayer", "Location","PMC_bin0.5","PMC_bin1.0","PMC_bin2.5", "PMC_bin10.0" )] #  "Event_PMC"
 
-# make bin size size & PMC long format
+# make bin size size & PMC_by_Bin long format
 Dylos <- melt(Dylos, id.vars=c("Date", "Sprayer", "Location"))
 
 #rename columns to match Mylar_PMC
@@ -94,50 +94,61 @@ Dylos$Sampler <- factor("Dylos")
 
 merge Mylar & Dylos data
 ```{r}
-PMC <- rbind(Mylar, Dylos)
+PMC_by_Bin <- rbind(Mylar, Dylos)
+PMC_by_Bin$Date <- as.Date(PMC_by_Bin$Date)
+
+PMC_tot <- aggregate(data=PMC_by_Bin, Conc_ug_cm3 ~ Date + Sprayer + Location + Sampler, sum)
 
 ```
 
+data in wide format for plots
+```{r}
+
+#make data wide format in order to compare total Dylos PMC_by_Bin to Mylar PMC_by_Bin (calibration)
+
+PMC_Mylar <- PMC_by_Bin[PMC_by_Bin$Sampler=="Mylar", ]
+colnames(PMC_Mylar)[colnames(PMC_Mylar)=="Conc_ug_cm3"] <- "Mylar_ug_cm3"
+PMC_Mylar <- PMC_Mylar[c("Date", "Sprayer", "Location", "Cut_um", "Mylar_ug_cm3")]
+## aggregate total PMC_by_Bin by day in order to compare overall since both samplers don't have same cut sizes
+PMC_Mylar <- aggregate(data=PMC_Mylar, Mylar_ug_cm3 ~ Date + Sprayer + Location, sum)
+
+PMC_Dylos <- PMC_by_Bin[PMC_by_Bin$Sampler=="Dylos",]
+colnames(PMC_Dylos)[colnames(PMC_Dylos)=="Conc_ug_cm3"] <- "Dylos_ug_cm3"
+PMC_Dylos <- PMC_Dylos[c("Date", "Sprayer", "Location", "Cut_um", "Dylos_ug_cm3")] ## aggregate total PMC_by_Bin by day in order to compare overall since both samplers don't have same cut sizes 
+PMC_Dylos <- aggregate(data=PMC_Dylos, Dylos_ug_cm3 ~ Date + Sprayer + Location, sum)
+
+
+PMC_wide <- merge(PMC_Mylar, PMC_Dylos, by= c("Date", "Sprayer", "Location"))
+
+
+```
 
 
 # Plots 
+
+Dylos vs Mylar total PMC
 ```{r}
-
-
-
-ggplot(data=PMC, aes(x=Cut_um, y= Conc_ug_cm3, color=Sampler)) + geom_point() + ylim(0,.0010)
-
-
-#geom_point() # #x=Cut_um,  Conc_ug_cm3
-
-
-
+#total PMC
+ggplot(data=PMC_wide, aes(x=Mylar_ug_cm3, y= Dylos_ug_cm3, color=Location)) + geom_point() #+ geom_smooth() 
 
 ```
 
 
+Scatterplot 
+```{r}
+
+ggplot(data=PMC_tot, aes(x=Date, y= Conc_ug_cm3, color=Sampler, shape=Location)) + geom_point() 
+
+
+ggplot(data=PMC_by_Bin, aes(x=Cut_um, y= Conc_ug_cm3, color=Sampler, shape=Location)) + geom_point() #+ ylim(0,.0010)
+
+```
 
 Cumulative Probability plot 
 ```{r}
+ggplot(data=PMC_tot, aes(x=Conc_ug_cm3, colour=Sampler)) + stat_ecdf() + labs(y="Cumulative Probability", x= "Concentration (ug/cm3)")
 
-#cumulative probability plot of PMC
-ggplot(data=PMC, aes(x=Conc_ug_cm3, colour=Sampler)) + stat_ecdf() + labs(y="Cumulative Probability", x= "Concentration (ug/cm3)")
-
-
-```
-
-
-
-
-
-geom_histogram, geom_freqpoly, stat_ecdf
-
-? usefull??  histogram
-```{r}
-
-#histogram 
-ggplot(data=PMC, aes(x=Conc_ug_cm3, colour=Sampler)) + geom_freqpoly()  #geom_point() # #x=Cut_um,  Conc_ug_cm3
- #######
+ggplot(data=PMC_by_Bin, aes(x=Conc_ug_cm3, colour=Sampler)) + stat_ecdf() + labs(y="Cumulative Probability", x= "Concentration (ug/cm3)")
 
 ```
 
@@ -145,12 +156,4 @@ ggplot(data=PMC, aes(x=Conc_ug_cm3, colour=Sampler)) + geom_freqpoly()  #geom_po
 
 
 
-
-
-
-
-
-------------- old plots -------------
-# # EXAMPLE: AFA, loc A, 9/28
-# ggplot(data=PMC[c(PMC$Sprayer=="AFA" & PMC$Location=="A" & PMC$Date=="2016-09-28" ),], aes(x=Cut_um, y= Conc_ug_cm3, color=Sampler)) + geom_point()#geom_point() # #x=Cut_um,  Conc_ug_cm3
-
+ 
