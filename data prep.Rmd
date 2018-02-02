@@ -23,29 +23,215 @@ met <- unique(met)
 #add correct column names 
 met <- met[c("Date_Time", "Temp_C", "Temp_C.min", "rh.min", "Wind_Dir_deg",  "WS_ms.min")]
 
-met$rh.min <- round(met$rh.min)
-
 colnames(met) <- c("Date_Time", "Temp_C_3m", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")
 
-#change date format to: year, month, day, hour, ?min
+met$Temp_C_3m <- round(met$Temp_C_3m,1)
+met$Temp_C_10m <- round(met$Temp_C_10m,1)
+met$rh <- round(met$rh)
+met$WD_Deg <- round(met$WD_Deg)
+met$WS_ms <- round(met$WS_ms,1)
+
+met$Date_Time <-  as.POSIXct(met$Date_Time, format = "%m/%d/%y %H:%M")
+
+#delete repeate rows
+met <- unique(met)
+
+met$Year <- as.numeric(format(met$Date_Time, format= "%Y"))
+met$Month <- as.numeric(format(met$Date_Time, format= "%m"))
+met$Day <- as.numeric(format(met$Date_Time, format= "%d"))
+met$Hour <- as.numeric(format(met$Date_Time, format= "%H"))
+met$Minute <- as.numeric(format(met$Date_Time, format= "%M"))
+
+met <- met[c("Year", "Month", "Day", "Hour", "Minute", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")] # "Temp_C_3m"
+ 
+```
+
+extract AAS events met data
+-will select by "Count" = Minutes 
+- ? use other surface & air met data for 1 hr during the event? [is air temp only taken twice/dy, thus won't matter?]
+
+```{r}
+# june 
+#Min_24 <- data.frame(Year=2016, Month=06, Day=10, Hour=11,  Count=seq(1:24))
+
+#Min_24 <- data.frame(Year=2016, Month=06, Day=10, Hour=seq(1:24))
+
+AAS1 <- subset(met, Day==10 & Hour ==11 & Minute >=1 & Minute <=7)
+##copy for later
+#AAS1b <- AAS1
+#AAS1$Count <- seq(1:length(AAS1$Minute))
+#AAS1 <- merge(Min_24, AAS1, by=c("Year", "Month", "Day", "Hour"), all.x = T)
+
+#write.csv(AAS1, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS1.csv", row.names=F)
 
 
-#write.csv(met, file = "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/met_R_export.csv", row.names = FALSE)
+## example of 1 set of met readings/event
+## replace 1st minute values w/ spray period avg
+# AAS1b <- AAS1
+# AAS1b[AAS1b$Minute==1 & !is.na(AAS1b$Minute), "Temp_C_3m"] <- round(mean(AAS1b$Temp_C_3m, na.rm = T),1)
+
+AAS1_event <- AAS1
+AAS1_event <- aggregate(data=AAS1_event, .~ Year + Month + Day + Hour, mean)
+AAS1_event$Temp_C_3m <- round(AAS1_event$Temp_C_3m,1)
+AAS1_event$Temp_C_10m <- round(AAS1_event$Temp_C_10m,1)
+AAS1_event$rh <- round(AAS1_event$rh)
+AAS1_event$WD_Deg <- round(AAS1_event$WD_Deg)
+AAS1_event$WS_ms <- round(AAS1_event$WS_ms, 1)
+
+#colnames(AAS1_event)[colnames(AAS1_event)=="Minute"] <- "Count"
+#AAS1_event$Count <- 11
+Count_24 <- data.frame(Year=2016, Month=06, Day=10, Hour=seq(1:24)) 
+AAS1_event <- merge(Count_24, AAS1_event, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+ AAS1_event <- AAS1_event[c("Year", "Month", "Day", "Count", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+
+ #add missing indicators
+ AAS1_event[is.na(AAS1_event$Temp_C_10m), "Temp_C_10m"] <- 99
+ AAS1_event[is.na(AAS1_event$rh), "rh"] <- 999
+ AAS1_event[is.na(AAS1_event$WD_Deg), "WD_Deg"] <- 999
+ AAS1_event[is.na(AAS1_event$WS_ms), "WS_ms"] <- 99
+ 
+#write.table(AAS1_event, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS1_event.txt", row.names=F, col.names=F)
 
 
-# ? split up data by spray event (n=15)
-## don't need to? use met data/data period
+
+
+#
+AAS2 <- subset(met, Day==10 & Hour ==11 & Minute >=16 & Minute <=22)
+AAS2$Count <- seq(1:length(AAS2$Minute))
+AAS2 <- merge(Min_24, AAS2, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+
+
+
+#write.csv(AAS2, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS2.csv", row.names=F)
+
+AAS3 <- subset(met, Day==10 & Hour ==11 & Minute >=42 & Minute <=48)
+AAS3$Count <- seq(1:length(AAS3$Minute))
+AAS3 <- merge(Min_24, AAS3, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS3, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS3.csv", row.names=F)
+
+
+# sept 28
+Min_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=9,  Count=seq(1:24))
+
+AAS4 <- subset(met, Day==28 & Hour ==9 & Minute >=34 & Minute <=42)
+AAS4$Count <- seq(1:length(AAS4$Minute))
+AAS4 <- merge(Min_24, AAS4, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS4, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS4.csv", row.names=F)
+
+
+Min_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=10,  Count=seq(1:24))
+
+AAS5 <- subset(met, Day==28 & Hour ==10 & Minute >=08 & Minute <=16)
+AAS5$Count <- seq(1:length(AAS5$Minute))
+AAS5 <- merge(Min_24, AAS5, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS5, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS5.csv", row.names=F)
+
+AAS6 <- subset(met, Day==28 & Hour ==10 & Minute >=40 & Minute <=47)
+AAS6$Count <- seq(1:length(AAS6$Minute))
+AAS6 <- merge(Min_24, AAS6, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS6, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS6.csv", row.names=F)
+
+Min_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=11,  Count=seq(1:24))
+
+# note: minute 16 is NA
+AAS7 <- subset(met, Day==28 & Hour ==11 & Minute >=09 & Minute <=16)
+AAS7$Count <- seq(1:length(AAS7$Minute))
+AAS7 <- merge(Min_24, AAS7, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS7, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS7.csv", row.names=F)
+
+#sept 29 
+Min_24 <- data.frame(Year=2016, Month=09, Day=29, Hour=09,  Count=seq(1:24))
+
+AAS8 <- subset(met, Day==29 & Hour ==09 & Minute >=14 & Minute <=22)
+AAS8$Count <- seq(1:length(AAS8$Minute))
+AAS8 <- merge(Min_24, AAS8, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS8, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS8.csv", row.names=F)
+
+
+AAS9 <- subset(met, Day==29 & Hour ==09 & Minute >=42 & Minute <=49)
+AAS9$Count <- seq(1:length(AAS9$Minute))
+AAS9 <- merge(Min_24, AAS9, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS9, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS9.csv", row.names=F)
+
+
+Min_24 <- data.frame(Year=2016, Month=09, Day=29, Hour=10,  Count=seq(1:24))
+
+AAS10 <- subset(met, Day==29 & Hour ==10 & Minute >=09 & Minute <=16)
+AAS10$Count <- seq(1:length(AAS10$Minute))
+AAS10 <- merge(Min_24, AAS10, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS10, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS10.csv", row.names=F)
+
+
+AAS11 <- subset(met, Day==29 & Hour ==10 & Minute >=36 & Minute <=42)
+AAS11$Count <- seq(1:length(AAS11$Minute))
+AAS11 <- merge(Min_24, AAS11, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS11, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS11.csv", row.names=F)
+
+
+#sept 30
+Min_24 <- data.frame(Year=2016, Month=09, Day=30, Hour=08,  Count=seq(1:24))
+
+AAS12 <- subset(met, Day==30 & Hour ==08 & Minute >=28 & Minute <=36)
+AAS12$Count <- seq(1:length(AAS12$Minute))
+AAS12 <- merge(Min_24, AAS12, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS12, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS12.csv", row.names=F)
+
+
+Min_24a <- data.frame(Year=2016, Month=09, Day=30, Hour=08, Count=1) 
+Min_24b <- data.frame(Year=2016, Month=09, Day=30, Hour=09,  Count=seq(2,24,1))
+Min_24 <- rbind(Min_24a,Min_24b)
+
+AAS13a <- subset(met, Day==30 & Hour ==08 & Minute ==59)
+AAS13a$Count <- seq(1:length(AAS13a$Minute))
+
+AAS13b <- subset(met, Day==30 & Hour ==09 & Minute >=00 & Minute <=05)
+AAS13b$Count <- seq(2,length(AAS13b$Minute)+1)
+
+AAS13 <- rbind(AAS13a,AAS13b)
+
+AAS13 <- merge(Min_24, AAS13, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS13, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS13.csv", row.names=F)
+
+
+Min_24 <- data.frame(Year=2016, Month=09, Day=30, Hour=09,  Count=seq(1:24))
+
+AAS14 <- subset(met, Day==30 & Hour ==09 & Minute >=26 & Minute <=33)
+AAS14$Count <- seq(1:length(AAS14$Minute))
+AAS14 <- merge(Min_24, AAS14, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS14, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS14.csv", row.names=F)
+
+
+AAS15 <- subset(met, Day==30 & Hour ==09 & Minute >=52 & Minute <=58)
+AAS15$Count <- seq(1:length(AAS15$Minute))
+AAS15 <- merge(Min_24, AAS15, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+
+#write.csv(AAS15, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS15.csv", row.names=F)
+
 
 ```
 
-summarize observations to 1 hour
+
+
+#write.csv(met, file = "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/min_met_R_export.csv", row.names = FALSE)
+
+
+[old?] summarize observations to 1 hour
 
 ```{r}
-met$Date_Time <-  as.POSIXct(met$Date_Time, format = "%m/%d/%y %H:%M")
-met$Year <- format(met$Date_Time, format= "%Y")
-met$Month <- format(met$Date_Time, format= "%m")
-met$Day <- format(met$Date_Time, format= "%d")
-met$Hour <- format(met$Date_Time, format= "%H")
 
  
 #calculate average values per hour
@@ -57,16 +243,16 @@ met$WD_Deg <- round(met$WD_Deg)
 met$WS_ms <- round(met$WS_ms,1)
 
 # create missing hours with NA values
-full_hours <- c(seq(0,9,by=1), seq(13,23,by=1))
+full_hours <- c(seq(1,9,by=1), seq(13,24,by=1))
 june_hours <- data.frame(Year=2016, Month=06, Day=10, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
 
-full_hours <- c(seq(0,8,by=1), seq(12,23,by=1))
+full_hours <- c(seq(1,8,by=1), seq(12,24,by=1))
 sep1_hours <- data.frame(Year=2016, Month=09, Day=28, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
 
-full_hours <- c(seq(0,7,by=1), seq(11,23,by=1))
+full_hours <- c(seq(1,7,by=1), seq(11,24,by=1))
 sep2_hours <- data.frame(Year=2016, Month=09, Day=29, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
 
-full_hours <- c(seq(0,7,by=1), seq(11,23,by=1))
+full_hours <- c(seq(1,7,by=1), seq(11,24,by=1))
 sep3_hours <- data.frame(Year=2016, Month=09, Day=30, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
 
 NA_hrs <- rbind(june_hours, sep1_hours, sep2_hours, sep3_hours) 
@@ -82,7 +268,12 @@ met$Month <- as.numeric(met$Month)
 met$Day <- as.numeric(met$Day)
 met$Hour <- as.numeric(met$Hour)
 
+#arrange rows in sequence by date & hour
+met <-met[order(met$Year, met$Month, met$Day, met$Hour),]
+
 #write.csv(met, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Hr_Met_RExport.csv", row.names = F)
+
+
 
 ```
 
