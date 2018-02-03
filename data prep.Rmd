@@ -4,6 +4,7 @@ author: "Magali Blanco"
 date: "1/17/2018"
 output: word_document
 ---
+Comparing AFA event data
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -12,7 +13,7 @@ library(readr)
 
 ```
 
-prep 1-minute met data
+clean up met file with all event data 
 ```{r}
 
 #import met data 
@@ -46,8 +47,7 @@ met <- met[c("Year", "Month", "Day", "Hour", "Minute", "Temp_C_10m", "rh", "WD_D
  
 ```
 
-extract AAS events met data
-
+create onsite event files
 ```{r}
 # june 
 
@@ -57,12 +57,13 @@ AAS1 <- subset(met, Day==10 & Hour ==11 & Minute >=1 & Minute <=7)
 #calculate avg met conditions for spray event
 AAS1 <- aggregate(data=AAS1, .~ Year + Month + Day + Hour, mean)
 AAS1 <- AAS1[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS1 <- merge(Count_24, AAS1, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
 AAS1$Temp_C_10m <- round(AAS1$Temp_C_10m,1)
 AAS1$rh <- round(AAS1$rh)
 AAS1$WD_Deg <- round(AAS1$WD_Deg)
 AAS1$WS_ms <- round(AAS1$WS_ms, 1)
-
-AAS1 <- merge(Count_24, AAS1, by=c("Year", "Month", "Day", "Hour"), all.x=T)
 
  #add missing indicators
  AAS1[is.na(AAS1$Temp_C_10m), "Temp_C_10m"] <- 99
@@ -72,230 +73,314 @@ AAS1 <- merge(Count_24, AAS1, by=c("Year", "Month", "Day", "Hour"), all.x=T)
  
 #write.table(AAS1, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS1.txt", row.names=F, col.names=F)
 
- 
- 
-##### FIX STUFF BELOW ###
+
 AAS2 <- subset(met, Day==10 & Hour ==11 & Minute >=16 & Minute <=22)
-AAS2$Count <- seq(1:length(AAS2$Minute))
-AAS2 <- merge(Min_24, AAS2, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS2 <- aggregate(data=AAS2, .~ Year + Month + Day + Hour, mean)
+AAS2 <- AAS2[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS2 <- merge(Count_24, AAS2, by=c("Year", "Month", "Day", "Hour"), all.x=T)
 
+#round estimates 
+AAS2$Temp_C_10m <- round(AAS2$Temp_C_10m,1)
+AAS2$rh <- round(AAS2$rh)
+AAS2$WD_Deg <- round(AAS2$WD_Deg)
+AAS2$WS_ms <- round(AAS2$WS_ms, 1)
 
-
+ #add missing indicators
+ AAS2[is.na(AAS2$Temp_C_10m), "Temp_C_10m"] <- 99
+ AAS2[is.na(AAS2$rh), "rh"] <- 999
+ AAS2[is.na(AAS2$WD_Deg), "WD_Deg"] <- 999
+ AAS2[is.na(AAS2$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS2, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS2.txt", row.names=F, col.names=F)
 
 AAS3 <- subset(met, Day==10 & Hour ==11 & Minute >=42 & Minute <=48)
-AAS3$Count <- seq(1:length(AAS3$Minute))
-AAS3 <- merge(Min_24, AAS3, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS3 <- aggregate(data=AAS3, .~ Year + Month + Day + Hour, mean)
+AAS3 <- AAS3[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS3 <- merge(Count_24, AAS3, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS3$Temp_C_10m <- round(AAS3$Temp_C_10m,1)
+AAS3$rh <- round(AAS3$rh)
+AAS3$WD_Deg <- round(AAS3$WD_Deg)
+AAS3$WS_ms <- round(AAS3$WS_ms, 1)
+
+ #add missing indicators
+ AAS3[is.na(AAS3$Temp_C_10m), "Temp_C_10m"] <- 99
+ AAS3[is.na(AAS3$rh), "rh"] <- 999
+ AAS3[is.na(AAS3$WD_Deg), "WD_Deg"] <- 999
+ AAS3[is.na(AAS3$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS3, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS3.txt", row.names=F, col.names=F)
 
 
 # sept 28
-Min_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=9,  Count=seq(1:24))
+Count_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=seq(1:24)) 
 
 AAS4 <- subset(met, Day==28 & Hour ==9 & Minute >=34 & Minute <=42)
-AAS4$Count <- seq(1:length(AAS4$Minute))
-AAS4 <- merge(Min_24, AAS4, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS4 <- aggregate(data=AAS4, .~ Year + Month + Day + Hour, mean)
+AAS4 <- AAS4[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS4 <- merge(Count_24, AAS4, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS4$Temp_C_10m <- round(AAS4$Temp_C_10m,1)
+AAS4$rh <- round(AAS4$rh)
+AAS4$WD_Deg <- round(AAS4$WD_Deg)
+AAS4$WS_ms <- round(AAS4$WS_ms, 1)
+
+ #add missing indicators
+ AAS4[is.na(AAS4$Temp_C_10m), "Temp_C_10m"] <- 99
+ AAS4[is.na(AAS4$rh), "rh"] <- 999
+ AAS4[is.na(AAS4$WD_Deg), "WD_Deg"] <- 999
+ AAS4[is.na(AAS4$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS4, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS4.txt", row.names=F, col.names=F)
 
 
-Min_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=10,  Count=seq(1:24))
-
 AAS5 <- subset(met, Day==28 & Hour ==10 & Minute >=08 & Minute <=16)
-AAS5$Count <- seq(1:length(AAS5$Minute))
-AAS5 <- merge(Min_24, AAS5, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS5 <- aggregate(data=AAS5, .~ Year + Month + Day + Hour, mean)
+AAS5 <- AAS5[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS5 <- merge(Count_24, AAS5, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS5$Temp_C_10m <- round(AAS5$Temp_C_10m,1)
+AAS5$rh <- round(AAS5$rh)
+AAS5$WD_Deg <- round(AAS5$WD_Deg)
+AAS5$WS_ms <- round(AAS5$WS_ms, 1)
+
+#add missing indicators
+AAS5[is.na(AAS5$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS5[is.na(AAS5$rh), "rh"] <- 999
+AAS5[is.na(AAS5$WD_Deg), "WD_Deg"] <- 999
+AAS5[is.na(AAS5$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS5, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS5.txt", row.names=F, col.names=F)
 
+
 AAS6 <- subset(met, Day==28 & Hour ==10 & Minute >=40 & Minute <=47)
-AAS6$Count <- seq(1:length(AAS6$Minute))
-AAS6 <- merge(Min_24, AAS6, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS6 <- aggregate(data=AAS6, .~ Year + Month + Day + Hour, mean)
+AAS6 <- AAS6[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS6 <- merge(Count_24, AAS6, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS6$Temp_C_10m <- round(AAS6$Temp_C_10m,1)
+AAS6$rh <- round(AAS6$rh)
+AAS6$WD_Deg <- round(AAS6$WD_Deg)
+AAS6$WS_ms <- round(AAS6$WS_ms, 1)
+
+#add missing indicators
+AAS6[is.na(AAS6$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS6[is.na(AAS6$rh), "rh"] <- 999
+AAS6[is.na(AAS6$WD_Deg), "WD_Deg"] <- 999
+AAS6[is.na(AAS6$WS_ms), "WS_ms"] <- 99
+
 
 #write.table(AAS6, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS6.txt", row.names=F, col.names=F)
 
-Min_24 <- data.frame(Year=2016, Month=09, Day=28, Hour=11,  Count=seq(1:24))
-
 # note: minute 16 is NA
 AAS7 <- subset(met, Day==28 & Hour ==11 & Minute >=09 & Minute <=16)
-AAS7$Count <- seq(1:length(AAS7$Minute))
-AAS7 <- merge(Min_24, AAS7, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS7 <- aggregate(data=AAS7, .~ Year + Month + Day + Hour, mean)
+AAS7 <- AAS7[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS7 <- merge(Count_24, AAS7, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS7$Temp_C_10m <- round(AAS7$Temp_C_10m,1)
+AAS7$rh <- round(AAS7$rh)
+AAS7$WD_Deg <- round(AAS7$WD_Deg)
+AAS7$WS_ms <- round(AAS7$WS_ms, 1)
+
+#add missing indicators
+AAS7[is.na(AAS7$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS7[is.na(AAS7$rh), "rh"] <- 999
+AAS7[is.na(AAS7$WD_Deg), "WD_Deg"] <- 999
+AAS7[is.na(AAS7$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS7, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS7.txt", row.names=F, col.names=F)
 
 #sept 29 
-Min_24 <- data.frame(Year=2016, Month=09, Day=29, Hour=09,  Count=seq(1:24))
+Count_24 <- data.frame(Year=2016, Month=09, Day=29, Hour=seq(1:24)) 
 
 AAS8 <- subset(met, Day==29 & Hour ==09 & Minute >=14 & Minute <=22)
-AAS8$Count <- seq(1:length(AAS8$Minute))
-AAS8 <- merge(Min_24, AAS8, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS8 <- aggregate(data=AAS8, .~ Year + Month + Day + Hour, mean)
+AAS8 <- AAS8[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS8 <- merge(Count_24, AAS8, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS8$Temp_C_10m <- round(AAS8$Temp_C_10m,1)
+AAS8$rh <- round(AAS8$rh)
+AAS8$WD_Deg <- round(AAS8$WD_Deg)
+AAS8$WS_ms <- round(AAS8$WS_ms, 1)
+
+#add missing indicators
+AAS8[is.na(AAS8$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS8[is.na(AAS8$rh), "rh"] <- 999
+AAS8[is.na(AAS8$WD_Deg), "WD_Deg"] <- 999
+AAS8[is.na(AAS8$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS8, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS8.txt", row.names=F, col.names=F)
 
-
 AAS9 <- subset(met, Day==29 & Hour ==09 & Minute >=42 & Minute <=49)
-AAS9$Count <- seq(1:length(AAS9$Minute))
-AAS9 <- merge(Min_24, AAS9, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS9 <- aggregate(data=AAS9, .~ Year + Month + Day + Hour, mean)
+AAS9 <- AAS9[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS9 <- merge(Count_24, AAS9, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS9$Temp_C_10m <- round(AAS9$Temp_C_10m,1)
+AAS9$rh <- round(AAS9$rh)
+AAS9$WD_Deg <- round(AAS9$WD_Deg)
+AAS9$WS_ms <- round(AAS9$WS_ms, 1)
+
+#add missing indicators
+AAS9[is.na(AAS9$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS9[is.na(AAS9$rh), "rh"] <- 999
+AAS9[is.na(AAS9$WD_Deg), "WD_Deg"] <- 999
+AAS9[is.na(AAS9$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS9, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS9.txt", row.names=F, col.names=F)
 
-
-Min_24 <- data.frame(Year=2016, Month=09, Day=29, Hour=10,  Count=seq(1:24))
-
 AAS10 <- subset(met, Day==29 & Hour ==10 & Minute >=09 & Minute <=16)
-AAS10$Count <- seq(1:length(AAS10$Minute))
-AAS10 <- merge(Min_24, AAS10, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS10 <- aggregate(data=AAS10, .~ Year + Month + Day + Hour, mean)
+AAS10 <- AAS10[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS10 <- merge(Count_24, AAS10, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS10$Temp_C_10m <- round(AAS10$Temp_C_10m,1)
+AAS10$rh <- round(AAS10$rh)
+AAS10$WD_Deg <- round(AAS10$WD_Deg)
+AAS10$WS_ms <- round(AAS10$WS_ms, 1)
+
+#add missing indicators
+AAS10[is.na(AAS10$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS10[is.na(AAS10$rh), "rh"] <- 999
+AAS10[is.na(AAS10$WD_Deg), "WD_Deg"] <- 999
+AAS10[is.na(AAS10$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS10, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS10.txt", row.names=F, col.names=F)
 
 
 AAS11 <- subset(met, Day==29 & Hour ==10 & Minute >=36 & Minute <=42)
-AAS11$Count <- seq(1:length(AAS11$Minute))
-AAS11 <- merge(Min_24, AAS11, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS11 <- aggregate(data=AAS11, .~ Year + Month + Day + Hour, mean)
+AAS11 <- AAS11[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS11 <- merge(Count_24, AAS11, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS11$Temp_C_10m <- round(AAS11$Temp_C_10m,1)
+AAS11$rh <- round(AAS11$rh)
+AAS11$WD_Deg <- round(AAS11$WD_Deg)
+AAS11$WS_ms <- round(AAS11$WS_ms, 1)
+
+#add missing indicators
+AAS11[is.na(AAS11$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS11[is.na(AAS11$rh), "rh"] <- 999
+AAS11[is.na(AAS11$WD_Deg), "WD_Deg"] <- 999
+AAS11[is.na(AAS11$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS11, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS11.txt", row.names=F, col.names=F)
 
-
 #sept 30
-Min_24 <- data.frame(Year=2016, Month=09, Day=30, Hour=08,  Count=seq(1:24))
+Count_24 <- data.frame(Year=2016, Month=09, Day=30, Hour=seq(1:24)) 
 
 AAS12 <- subset(met, Day==30 & Hour ==08 & Minute >=28 & Minute <=36)
-AAS12$Count <- seq(1:length(AAS12$Minute))
-AAS12 <- merge(Min_24, AAS12, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS12 <- aggregate(data=AAS12, .~ Year + Month + Day + Hour, mean)
+AAS12 <- AAS12[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS12 <- merge(Count_24, AAS12, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS12$Temp_C_10m <- round(AAS12$Temp_C_10m,1)
+AAS12$rh <- round(AAS12$rh)
+AAS12$WD_Deg <- round(AAS12$WD_Deg)
+AAS12$WS_ms <- round(AAS12$WS_ms, 1)
+
+#add missing indicators
+AAS12[is.na(AAS12$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS12[is.na(AAS12$rh), "rh"] <- 999
+AAS12[is.na(AAS12$WD_Deg), "WD_Deg"] <- 999
+AAS12[is.na(AAS12$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS12, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS12.txt", row.names=F, col.names=F)
 
-
-Min_24a <- data.frame(Year=2016, Month=09, Day=30, Hour=08, Count=1) 
-Min_24b <- data.frame(Year=2016, Month=09, Day=30, Hour=09,  Count=seq(2,24,1))
-Min_24 <- rbind(Min_24a,Min_24b)
-
 AAS13a <- subset(met, Day==30 & Hour ==08 & Minute ==59)
-AAS13a$Count <- seq(1:length(AAS13a$Minute))
-
 AAS13b <- subset(met, Day==30 & Hour ==09 & Minute >=00 & Minute <=05)
-AAS13b$Count <- seq(2,length(AAS13b$Minute)+1)
-
 AAS13 <- rbind(AAS13a,AAS13b)
+AAS13$Hour <- 9
 
-AAS13 <- merge(Min_24, AAS13, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS13 <- aggregate(data=AAS13, .~ Year + Month + Day + Hour, mean)
+AAS13 <- AAS13[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS13 <- merge(Count_24, AAS13, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS13$Temp_C_10m <- round(AAS13$Temp_C_10m,1)
+AAS13$rh <- round(AAS13$rh)
+AAS13$WD_Deg <- round(AAS13$WD_Deg)
+AAS13$WS_ms <- round(AAS13$WS_ms, 1)
+
+#add missing indicators
+AAS13[is.na(AAS13$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS13[is.na(AAS13$rh), "rh"] <- 999
+AAS13[is.na(AAS13$WD_Deg), "WD_Deg"] <- 999
+AAS13[is.na(AAS13$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS13, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS13.txt", row.names=F, col.names=F)
 
-
-Min_24 <- data.frame(Year=2016, Month=09, Day=30, Hour=09,  Count=seq(1:24))
-
 AAS14 <- subset(met, Day==30 & Hour ==09 & Minute >=26 & Minute <=33)
-AAS14$Count <- seq(1:length(AAS14$Minute))
-AAS14 <- merge(Min_24, AAS14, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS14 <- aggregate(data=AAS14, .~ Year + Month + Day + Hour, mean)
+AAS14 <- AAS14[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS14 <- merge(Count_24, AAS14, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS14$Temp_C_10m <- round(AAS14$Temp_C_10m,1)
+AAS14$rh <- round(AAS14$rh)
+AAS14$WD_Deg <- round(AAS14$WD_Deg)
+AAS14$WS_ms <- round(AAS14$WS_ms, 1)
+
+#add missing indicators
+AAS14[is.na(AAS14$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS14[is.na(AAS14$rh), "rh"] <- 999
+AAS14[is.na(AAS14$WD_Deg), "WD_Deg"] <- 999
+AAS14[is.na(AAS14$WS_ms), "WS_ms"] <- 99
 
 #write.table(AAS14, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS14.txt", row.names=F, col.names=F)
 
-
 AAS15 <- subset(met, Day==30 & Hour ==09 & Minute >=52 & Minute <=58)
-AAS15$Count <- seq(1:length(AAS15$Minute))
-AAS15 <- merge(Min_24, AAS15, by=c("Year", "Month", "Day", "Hour", "Count"), all.x = T)
+AAS15 <- aggregate(data=AAS15, .~ Year + Month + Day + Hour, mean)
+AAS15 <- AAS15[c("Year", "Month", "Day", "Hour", "Temp_C_10m", "rh", "WD_Deg", "WS_ms")]
+AAS15 <- merge(Count_24, AAS15, by=c("Year", "Month", "Day", "Hour"), all.x=T)
+
+#round estimates 
+AAS15$Temp_C_10m <- round(AAS15$Temp_C_10m,1)
+AAS15$rh <- round(AAS15$rh)
+AAS15$WD_Deg <- round(AAS15$WD_Deg)
+AAS15$WS_ms <- round(AAS15$WS_ms, 1)
+
+#add missing indicators
+AAS15[is.na(AAS15$Temp_C_10m), "Temp_C_10m"] <- 99
+AAS15[is.na(AAS15$rh), "rh"] <- 999
+AAS15[is.na(AAS15$WD_Deg), "WD_Deg"] <- 999
+AAS15[is.na(AAS15$WS_ms), "WS_ms"] <- 99
+
 
 #write.table(AAS15, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/Event Min Met/AAS15.txt", row.names=F, col.names=F)
 
 
 ```
 
-
-
-#write.csv(met, file = "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/min_met_R_export.csv", row.names = FALSE)
-
-
-[old?] summarize observations to 1 hour
-
+calculate Dylos PMC estimates for each event, location & ht
 ```{r}
+Dylos <- read_csv("~/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Dylos/SprayEvents180114.csv")
+Dylos <- Dylos[Dylos$Event != "Control", c("Date", "Event", "Quadrant", "Location","Height", "PMCperMin")]
+Dylos$Event <- as.numeric(Dylos$Event)
+Dylos$Quadrant <- as.numeric(Dylos$Quadrant)
+Dylos$Date <- as.Date(Dylos$Date, "%m/%d/%y")
 
- 
-#calculate average values per hour
-met <- aggregate(data=met[,!colnames(met) %in% c("Date_Time")], .~ Year+Month+Day+Hour, mean)
-met$Temp_C_3m <- round(met$Temp_C_3m,1)
-met$Temp_C_10m <- round(met$Temp_C_10m,1)
-met$rh <- round(met$rh)
-met$WD_Deg <- round(met$WD_Deg) 
-met$WS_ms <- round(met$WS_ms,1)
-
-# create missing hours with NA values
-full_hours <- c(seq(1,9,by=1), seq(13,24,by=1))
-june_hours <- data.frame(Year=2016, Month=06, Day=10, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
-
-full_hours <- c(seq(1,8,by=1), seq(12,24,by=1))
-sep1_hours <- data.frame(Year=2016, Month=09, Day=28, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
-
-full_hours <- c(seq(1,7,by=1), seq(11,24,by=1))
-sep2_hours <- data.frame(Year=2016, Month=09, Day=29, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
-
-full_hours <- c(seq(1,7,by=1), seq(11,24,by=1))
-sep3_hours <- data.frame(Year=2016, Month=09, Day=30, Hour = full_hours, Temp_C_3m=NA, Temp_C_10m=NA, rh=NA, WD_Deg=NA, WS_ms=NA)
-
-NA_hrs <- rbind(june_hours, sep1_hours, sep2_hours, sep3_hours) 
-
-## Merge the complete data frame with the incomplete to fill in the dates and add
-## NAs for missing values
-#my_complete_data <- merge(full_hours, my_incomplete_data, by = "date",
- #                         all.x = TRUE)
-
-met <- rbind(NA_hrs, met)#, all.x=T)
-
-met$Month <- as.numeric(met$Month)
-met$Day <- as.numeric(met$Day)
-met$Hour <- as.numeric(met$Hour)
-
-#arrange rows in sequence by date & hour
-met <-met[order(met$Year, met$Month, met$Day, met$Hour),]
-
-#write.csv(met, "/Users/magaliblanco/Everything/School/PhD_UW/Courses/2. Winter 18/ENVH 595 Yost RR/Data/Hr_Met_RExport.csv", row.names = F)
-
-
-
-```
-
-
-(too complicated)  look at all met data? 
-```{r}
-# met_june <- read.csv("Datasets/MetTenSecondData_09-10JUN2016.csv", header = TRUE)
-# met_sept <- read.csv("/Users/magaliblanco/Desktop/Thesis/2.Data/2.Analysis/R/Datasets/TenSecondData_28-30SEPT2016_copy.csv")
-# met_sept <- met_sept[-c(1:3),-c(3:5,8,10)]
-# 
-# colnames(met_june) <- c("Date_Time", "Record", "Temp_C", "Wind_Spd_ms", "Wind_Dir_deg")
-# colnames(met_sept) <- c("Date_Time", "Record", "Temp_C", "Wind_Spd_ms", "Wind_Dir_deg")
-# 
-# #add sept met data 
-# met <- rbind(met_june,met_sept)
-# 
-# #take mean of the data by min
-# 
-# met$Temp_C <- as.numeric(met$Temp_C)
-# 
-# met$Temp_F <- met$Temp_C*9/5 + 32
-# met$Temp_F <- as.numeric(met$Temp_F)
-# 
-# met$Wind_Spd_ms <-as.numeric(met$Wind_Spd_ms)
-# 
-# met$Wind_Spd_MPH <- met$Wind_Spd_ms/2/15*64
-# met$Wind_Spd_MPH <- as.numeric(met$Wind_Spd_MPH)
-# 
-# met$Wind_Dir_deg <- as.numeric(met$Wind_Dir_deg)
-# 
-# met$Date_Time <- as.POSIXct(met$Date_Time, format = '%m/%d/%y %I:%M %p')
-# 
-# met <- aggregate(data=met, cbind(Temp_C, Temp_F, Wind_Spd_ms, Wind_Spd_MPH, Wind_Dir_deg) 
-#                  ~ Date_Time, mean)
-# 
-# met$Wind_Dir_deg <- as.numeric(met$Wind_Dir_deg)
-# met$Wind_Dir_card <- as.factor(degToCard(met$Wind_Dir_deg))
+Dylos$Height <- ifelse(Dylos$Height=="Above", 6,2)
+colnames(Dylos)[colnames(Dylos)=="Height"] <- "Height_m"
+colnames(Dylos)[colnames(Dylos)=="PMCperMin"] <- "Dylos_ug_m3"
 
 ```
 
 
 
-prep spray observations 
-```{r}
 
-```
+
+
+
 
